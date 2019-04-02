@@ -1,0 +1,132 @@
+《txhf01.m》
+clear;
+Img=imread('lena.bmp');
+figure,imshow(Img);  %显示原图像
+title('lena.bmp原图像');
+Img=im2double(Img);
+M=0.02;V=0.01;  %M和V分别为高斯噪声的均值和方差
+ImgNoise=imnoise(Img,'gaussian',M,V);
+figure,imshow(ImgNoise);  %显示加入高斯噪声后的图像
+%figure,imshow(ImgNoise);
+title(['lena.bmp加入高斯噪声(均值=' num2str(M) '方差=' num2str(V) ')后']);
+size=5; %滤波器模板大小
+% 算术均值滤波 Img1
+Img1=fspecial('average',size);  
+Img1=imfilter(ImgNoise,Img1);%(待处理矩阵，滤波器)
+figure,imshow(Img1,[0,1]);title([num2str(size) '*' num2str(size) '算术均值滤波']);
+% 几何均值滤波 Img2
+% %方法一
+% Img2=ImgNoise;
+% for x=1+size2:1:n-size2
+%     for y=1+size2:1:m-size2
+%         is=ImgNoise(x-size2:1:x+size2,y-size2:1:y+size2);
+%         Img2(x,y)=prod(prod(is(:)))^(1/numel(is)); 
+%     end
+% end
+%方法二
+Img2=exp(imfilter(log(ImgNoise),fspecial('average',size)));
+figure,imshow(Img2,[]);title([num2str(size) '*' num2str(size) '几何均值滤波']);
+
+% 谐波均值滤波 Img3
+Img3=1./(imfilter(1./ImgNoise,fspecial('average',size)));
+figure,imshow(Img3,[0,1]);title([num2str(size) '*' num2str(size)  '谐波均值滤波']);
+% 逆谐波均值滤波 Img4
+Q=1.5;
+% %方法一
+% for x=1+size2:1:n-size2
+%     for y=1+size2:1:m-size2
+%         is=ImgNoise(x-size2:1:x+size2,y-size2:1:y+size2);
+%         Img4(x,y)=sum(is(:).^(Q+1))/sum(is(:).^(Q));
+%     end
+% end
+%方法二
+Img4=imfilter(ImgNoise.^(Q+1),fspecial('average',size))./imfilter(ImgNoise.^Q,fspecial('average',size));
+figure,imshow(Img4,[0,1]);title('Q=1.5逆谐波滤波器滤波');
+Q=-1.5;
+Img4=imfilter(ImgNoise.^(Q+1),fspecial('average',size))./imfilter(ImgNoise.^Q,fspecial('average',size));
+figure,imshow(Img4,[0,1]);title('Q=-1.5逆谐波滤波器滤波');
+% 中值滤波器 Img5
+Img5= medfilt2(ImgNoise,[size,size]); %进行3 × 3模板的中值滤波
+figure,imshow(Img5,[0,1]);title([num2str(size) '*' num2str(size) '中值滤波器滤波']);
+
+《txhf02.m》
+clear;
+Img=imread('lena.bmp');
+[m,n]=size(Img);
+figure,imshow(Img);  %显示原图像
+title('lena.bmp原图像');
+Img=im2double(Img);
+ImgNoise=imnoise(Img,'salt & pepper',0.1);% 加入椒盐噪声
+figure,imshow(ImgNoise);  %显示加入椒盐噪声后的图像
+title('lena.bmp加入椒盐噪声后');
+size=5; %滤波器模板大小
+size2=(size-1)/2;
+% 算术均值滤波 Img1
+Img1=fspecial('average',size);  
+Img1=imfilter(ImgNoise,Img1);%(待处理矩阵，滤波器)
+figure,imshow(Img1,[0,1]);title([num2str(size) '*' num2str(size) '算术均值滤波']);
+% 逆谐波均值滤波 Img4
+Q=1.5;
+% %方法一
+% for x=1+size2:1:n-size2
+%     for y=1+size2:1:m-size2
+%         is=ImgNoise(x-size2:1:x+size2,y-size2:1:y+size2);
+%         Img4(x,y)=sum(is(:).^(Q+1))/sum(is(:).^(Q));
+%     end
+% end
+%方法二
+Img4=imfilter(ImgNoise.^(Q+1),fspecial('average',size))./imfilter(ImgNoise.^Q,fspecial('average',size));
+figure,imshow(Img4,[0,1]);title('Q=1.5逆谐波滤波器滤波');
+Q=-1.5;
+Img4=imfilter(ImgNoise.^(Q+1),fspecial('average',size))./imfilter(ImgNoise.^Q,fspecial('average',size));
+figure,imshow(Img4,[0,1]);title('Q=-1.5逆谐波滤波器滤波');
+Q=0;
+Img4=imfilter(ImgNoise.^(Q+1),fspecial('average',size))./imfilter(ImgNoise.^Q,fspecial('average',size));
+figure,imshow(Img4,[0,1]);title('Q=0逆谐波滤波器滤波');
+% 中值滤波器 Img5
+Img5= medfilt2(ImgNoise); 
+figure,imshow(Img5,[0,1]);title([num2str(size) '*' num2str(size) '中值滤波器滤波']);
+
+《txhf03.m》
+clear;
+strImg='lena.bmp';
+Img=imread(strImg);
+figure,imshow(Img);  %显示原图像
+title('lena.bmp原图像');
+Img=im2double(Img);
+F=fftshift(fft2(Img));  %傅里叶变换得到F(u,v)
+[M,N]=size(F);
+%创建模糊滤波器
+a=0.1;b=0.1;T=1;
+strlbq=['模糊滤波器 ' ' a=' num2str(a) ' b=' num2str(b) ' T=' num2str(T)];
+    for u=1:M
+        for v=1:N
+            psf(u,v)=(T/(pi*(u*a+v*b)))*sin(pi*(u*a+v*b))*exp(-sqrt(-1)*pi*(u*a+v*b));  % 5.6-11式
+            G(u,v)=psf(u,v)*F(u,v);
+        end
+    end
+Img_mohu1=(ifft2(ifftshift(G)));   %傅里叶反变换
+Img_mohu1=256.*Img_mohu1./max(max(Img_mohu1));
+figure,imshow(uint8(real(Img_mohu1)));
+title([strImg ' ' strlbq]);
+%模糊lena.bmp图像：45度方向，T=1；
+psf=fspecial('motion',50,45);
+Img_mohu2=imfilter(Img,psf,'circular','conv');
+figure,imshow(uint8(255.*Img_mohu2./max(max(Img_mohu2))));
+title([strImg '运动模糊后(角度45度)']);
+%在运动模糊后图像上增加噪声
+Img_mohu3=imnoise(Img_mohu2,'gaussian',0.01,0.02);
+figure,imshow(Img_mohu3);
+title([strImg '运动模糊后加上噪声']);
+%维纳滤波器恢复
+noise=imnoise(zeros(size(Img)),'gaussian',0,0.01);
+NSR=sum(noise(:).^2)/sum(im2double(Img(:)).^2);
+Img_NSR=deconvwnr(Img_mohu3,psf,NSR);
+figure,imshow(Img_NSR);
+title([strImg '维纳滤波结果']);
+%约束最小二乘滤波恢复
+V=0.0001;
+[Img_CLSF,LAGRA]=deconvreg(Img_mohu2,psf,V*numel(Img));
+figure,imshow(Img_CLSF);
+title([strImg '约束最小二乘滤波结果']);
+
